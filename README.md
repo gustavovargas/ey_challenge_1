@@ -1,2 +1,2 @@
-# ey_challenge_1
-EY Wavespace Financial Challenge - Time series prediction
+# Hipótesis Alternativa
+## EY Wavespace Financial Challenge - Time series prediction
