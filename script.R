@@ -10,13 +10,13 @@ if (!require("scales")) install.packages("scales"); library(scales)
 
 # Realizamos la descarga de datos
 tf <- "1 hour"  # Temporalidad '15 mins', '30 mins', '1 hour', '1 day'
-historico <- "5 Y"  3 Días a analizar
+historico <- "5 Y"  # 3 Días a analizar
 split.Ratio <- 0.85
 accuracyDDBB <- NULL  # DF to save information
 performanceDDBB <- NULL  # DF to save information
 Investment <- 100000  # Amount of dollars to invest
 
-Quote_Currenncy <- "EUR"
+Quote_Currency <- "EUR"
 Price_Currency <- "USD"
 
 # Ralizamos la conexión con IB
@@ -36,7 +36,7 @@ if (isConnected(tws)){
                                                  duration = historico) %>%
   as.data.frame() %><>
   dplyr::select(1:4) %>%
-  purr::set_names(c("Open", "High", "Low", "Close"))
+  purrr::set_names(c("Open", "High", "Low", "Close"))
 }
 
 IBrokers::twsDisconnect(tws)
@@ -47,7 +47,7 @@ h2o.init(max_mem_size = "2B", nthreads = -1)
 # Creamos la base de datos con las variables a usarr en el algoritmo
 data.ANN <- dataset.Precios %>%
   rownames_to_column(var = "Dates") %>%
-  transmute ( Fechas = Dates,
+  transmute (Fechas = Dates,
   OH = Open - High,
   OL = Open - Low,
   A_1 = SMA(Close, n = 3),
@@ -62,7 +62,7 @@ data.ANN <- dataset.Precios %>%
   PricesMean = (High + Open + Low + Close)/4,
   OpO = Open - lag(Open, n=1),
   OpC = Open - lag(Cloase, n=1),
-  CpC = Closee - lag(Close, n=1),
+  CpC = Close - lag(Close, n=1),
   Return = ROC(Close, n=1, type="discrete"),
   P.Rise = ifelse(lead(Close, n=1) / Close > 1, 1, 0)) %>%
 na.omit()
@@ -72,7 +72,7 @@ trainset <- data.ANN %>% dplyr::slice(1:floor(split.Ratio * nrow(data.ANN)))
 testset <- data.ANN %>% dplyr::slice((floor(split.Ratio * nrow(data.ANN)) + 1):n())
 
 # Creamos la Red Neuronal
-model-ANN = h2o.deeplearning(y = "P_Rise",
+model.ANN = h2o.deeplearning(y = "P_Rise",
                              training_frame = trainset %>% dplyr::select(-Fechas) %>% as.h2o(),
                              distribution = "AUTO",
                              activation = "Rectifier",
